@@ -63,45 +63,6 @@ Contribuția inginerească constă în dezvoltarea unui **Motor de Date Sintetic
 
 **Diagrama Vizuală:** Consultați fișierul `docs/state_machine.png`
 
-stateDiagram-v2
-    direction LR
-    
-    %% Stari Principale
-    [*] --> INITIALIZATION: Start App
-    
-    state "INITIALIZATION" as Init {
-        Load_Model
-        Load_Configs
-        Load_Assets
-    }
-
-    state "IDLE_LOOP (Wait User Input)" as Idle
-    
-    state "SIMULATION_PIPELINE" as Sim {a
-        GENERATE_SCENARIO: Place Cars & Light
-        EXTRACT_ROIs: Crop 64x64 Images
-        PREPROCESS: Resize & Normalize
-        CNN_INFERENCE: PyTorch Prediction
-        UPDATE_OVERLAY: Draw Green/Red
-        DISPLAY_RESULT: Show Window
-    }
-
-    state "CONFIG_CHANGE" as Config {
-        CHANGE_BACKGROUND: Load Next Layout
-    }
-
-    %% Tranzitii
-    Init --> Idle: Ready
-    
-    Idle --> Sim: Key SPACE
-    Sim --> Idle: Done
-    
-    Idle --> Config: Key B
-    Config --> Sim: Auto-Trigger
-    
-    Idle --> CLEANUP: Key Q
-    CLEANUP --> [*]: Stop
-
 **Descrierea fluxului:**
 
 ```
