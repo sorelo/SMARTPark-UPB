@@ -1,1 +1,8 @@
-
+Biblioteci necesare pentru rularea proiectului:
+opencv-python - Citirea imaginilor si prelucrarea acestora.
+numpy - Manipularea matematica de date.
+matplotplib - Generarea graficilor.
+torch - Framework-ul de Deep Learning.
+torchvision - Extensie PyTorch pentru Computer Vision.
+scikit-learn - Utilitare pentru Machine Learning clasic si metrici.
+pillow - Procesare de imagini.
