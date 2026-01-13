@@ -1,67 +1,43 @@
 import os
 import shutil
 import random
-import glob
 
 # --- CONFIGURARE ---
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 SOURCE_DIR = os.path.join(BASE_DIR, 'data', 'processed')
-DEST_DIR = os.path.join(BASE_DIR, 'data')
-
-# Procente pentru împărțire (Total = 1.0)
-TRAIN_RATIO = 0.7
-VAL_RATIO = 0.15
-TEST_RATIO = 0.15
-
-def clear_folder(folder_path):
-    """Șterge conținutul folderului pentru a nu amesteca date vechi."""
-    if os.path.exists(folder_path):
-        shutil.rmtree(folder_path)
-    os.makedirs(folder_path, exist_ok=True)
-
-def copy_files(files, source, destination, category):
-    """Copiază o listă de fișiere în destinație."""
-    dest_path = os.path.join(destination, category)
-    os.makedirs(dest_path, exist_ok=True)
-    
-    for f in files:
-        shutil.copy2(os.path.join(source, category, f), os.path.join(dest_path, f))
+TRAIN_DIR = os.path.join(BASE_DIR, 'data', 'train')
+VAL_DIR = os.path.join(BASE_DIR, 'data', 'validation')
+TEST_DIR = os.path.join(BASE_DIR, 'data', 'test')
 
 def main():
-    print(">>> Începere împărțire dataset (Train / Val / Test)...")
+    print("📦 Se împarte dataset-ul (70% Train, 15% Val, 15% Test)...")
+    
+    for folder in [TRAIN_DIR, VAL_DIR, TEST_DIR]:
+        for cls in ['liber', 'ocupat']:
+            os.makedirs(os.path.join(folder, cls), exist_ok=True)
 
-    # 1. Curățăm folderele destinație
-    for split in ['train', 'validation', 'test']:
-        clear_folder(os.path.join(DEST_DIR, split))
+    for cls in ['liber', 'ocupat']:
+        src_path = os.path.join(SOURCE_DIR, cls)
+        files = os.listdir(src_path)
+        random.shuffle(files)
 
-    # 2. Procesăm fiecare clasă (liber / ocupat)
-    for category in ['liber', 'ocupat']:
-        src_path = os.path.join(SOURCE_DIR, category)
-        if not os.path.exists(src_path):
-            print(f"Eroare: Nu găsesc folderul {src_path}")
-            continue
+        n = len(files)
+        tr = int(n * 0.7)
+        vl = int(n * 0.85)
 
-        # Luăm toate imaginile
-        images = os.listdir(src_path)
-        random.shuffle(images) # Le amestecăm bine
-        
-        total = len(images)
-        train_count = int(total * TRAIN_RATIO)
-        val_count = int(total * VAL_RATIO)
-        
-        # Slicing (tăiem lista)
-        train_files = images[:train_count]
-        val_files = images[train_count : train_count + val_count]
-        test_files = images[train_count + val_count :]
+        # Split
+        train_files = files[:tr]
+        val_files = files[tr:vl]
+        test_files = files[vl:]
 
-        print(f"Clasa '{category}': Total {total} -> Train: {len(train_files)}, Val: {len(val_files)}, Test: {len(test_files)}")
+        print(f"Clasa {cls.upper()}: {len(train_files)} Train | {len(val_files)} Val | {len(test_files)} Test")
 
-        # Copiem fizic fișierele
-        copy_files(train_files, SOURCE_DIR, os.path.join(DEST_DIR, 'train'), category)
-        copy_files(val_files, SOURCE_DIR, os.path.join(DEST_DIR, 'validation'), category)
-        copy_files(test_files, SOURCE_DIR, os.path.join(DEST_DIR, 'test'), category)
+        # Mutare fișiere
+        for f in train_files: shutil.copy2(os.path.join(src_path, f), os.path.join(TRAIN_DIR, cls, f))
+        for f in val_files:   shutil.copy2(os.path.join(src_path, f), os.path.join(VAL_DIR, cls, f))
+        for f in test_files:  shutil.copy2(os.path.join(src_path, f), os.path.join(TEST_DIR, cls, f))
 
-    print(">>> Gata! Folderele data/train, data/validation și data/test sunt populate.")
+    print("✅ Dataset-ul a fost structurat pentru antrenare!")
 
 if __name__ == "__main__":
     main()
