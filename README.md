@@ -1,7 +1,9 @@
 # SMARTPark UPB - Sistem de Monitorizare a Parcării
 
 **Student:** Ilie Marian-Ionuț
+
 **Grupa:** 633AB
+
 **Disciplina:** Rețele Neuronale
 
 ## Descriere
@@ -25,4 +27,5 @@ Proiectul este documentat incremental, conform cerințelor de laborator:
 * **Data Science:** Pandas, NumPy, Scikit-learn.
 
 ---
+
 *Proiect realizat în cadrul Facultății de Inginerie Industrială și Robotică (FIIR), UNSTPB.*
