@@ -51,7 +51,7 @@ def overlay_transparent(background, overlay, x, y, target_w, target_h):
 def main():
     # 1. Incarcare Model
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    print(f"🚀 Pornire Demo pe: {device}")
+    print(f"Pornire Demo pe: {device}")
     
     model = ParkingCNN().to(device)
     
@@ -88,7 +88,7 @@ def main():
 
     # 2. Incarcare Resurse
     if not os.path.exists(CONFIG_FILE):
-        print("❌ Eroare: Nu exista configurarea locurilor.")
+        print("Eroare: Nu exista configurarea locurilor.")
         return
 
     with open(CONFIG_FILE, 'r') as f:
@@ -96,7 +96,7 @@ def main():
     
     bg_names = list(configs.keys())
     if not bg_names:
-        print("❌ Config empty.")
+        print("Config empty.")
         return
 
     car_files = glob.glob(os.path.join(CAR_DIR, "*.png"))
@@ -110,7 +110,7 @@ def main():
         img_p = os.path.join(BG_DIR, fname)
         img = cv2.imread(img_p)
         if img is None:
-            print(f"⚠️ Atenție: Nu am putut încărca fundalul {img_p}")
+            print(f"Atenție: Nu am putut încărca fundalul {img_p}")
             return np.zeros((720, 1280, 3), dtype=np.uint8), [], fname
         spots = configs[fname]
         return img, spots, fname

@@ -40,7 +40,7 @@ def train_model():
 
     # 2. Încărcarea Datelor
     if not os.path.exists(TRAIN_DIR):
-        print(f"❌ Eroare: Folderul {TRAIN_DIR} nu există. Rulează split_dataset.py mai întâi!")
+        print(f"Eroare: Folderul {TRAIN_DIR} nu există. Rulează split_dataset.py mai întâi!")
         return
 
     train_dataset = datasets.ImageFolder(TRAIN_DIR, transform=transform)
@@ -49,9 +49,9 @@ def train_model():
     train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
     val_loader = DataLoader(val_dataset, batch_size=BATCH_SIZE, shuffle=False)
 
-    print(f"📊 Imagini de antrenare: {len(train_dataset)}")
-    print(f"📊 Imagini de validare: {len(val_dataset)}")
-    print(f"🏷️  Clase identificate: {train_dataset.classes}")
+    print(f"Imagini de antrenare: {len(train_dataset)}")
+    print(f"Imagini de validare: {len(val_dataset)}")
+    print(f"Clase identificate: {train_dataset.classes}")
 
     # 3. Inițializarea Modelului, Funcției de Loss și a Optimizatorului
     model = ParkingCNN().to(device)
@@ -62,7 +62,7 @@ def train_model():
     history = []
 
     # 4. Bucla Principală de Antrenare
-    print("\n🚀 Începe antrenarea modelului...")
+    print("\nÎncepe antrenarea modelului...")
     for epoch in range(EPOCHS):
         model.train()
         running_loss = 0.0
@@ -130,9 +130,9 @@ def train_model():
     df_history.to_csv(os.path.join(RESULTS_DIR, 'training_history.csv'), index=False)
 
     print("\n" + "="*40)
-    print("✅ ANTRENAMENT FINALIZAT CU SUCCES!")
-    print(f"💾 Model salvat în: {MODEL_SAVE_PATH}")
-    print(f"📈 Istoric metrici salvat în: {RESULTS_DIR}/training_history.csv")
+    print("ANTRENAMENT FINALIZAT CU SUCCES!")
+    print(f"Model salvat în: {MODEL_SAVE_PATH}")
+    print(f"Istoric metrici salvat în: {RESULTS_DIR}/training_history.csv")
     print("="*40)
 
 if __name__ == "__main__":

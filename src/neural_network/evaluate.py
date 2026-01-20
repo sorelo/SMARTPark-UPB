@@ -25,7 +25,7 @@ DOCS_DIR = os.path.join(BASE_DIR, 'docs')
 def evaluate_model():
     # 1. Configurare Device
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    print(f"📊 Start Evaluare pe: {device}")
+    print(f"Start Evaluare pe: {device}")
 
     # 2. Incarcare Date Test
     transform = transforms.Compose([
@@ -35,34 +35,34 @@ def evaluate_model():
     ])
 
     if not os.path.exists(TEST_DIR):
-        print("❌ Eroare: Folderul data/test nu exista. Ruleaza split_dataset.py!")
+        print("Eroare: Folderul data/test nu exista. Ruleaza split_dataset.py!")
         return
 
     test_dataset = datasets.ImageFolder(TEST_DIR, transform=transform)
     test_loader = DataLoader(test_dataset, batch_size=32, shuffle=False)
     
-    print(f"🔍 Imagini de test: {len(test_dataset)}")
+    print(f"Imagini de test: {len(test_dataset)}")
     
     # 3. Incarcare Model
     if not os.path.exists(MODEL_PATH):
-        print(f"❌ Eroare critică: Nu am găsit modelul la {MODEL_PATH}")
-        print("👉 Te rog să rulezi mai întâi: python src/neural_network/train.py")
+        print(f"Eroare critică: Nu am găsit modelul la {MODEL_PATH}")
+        print("Te rog să rulezi mai întâi: python src/neural_network/train.py")
         return
 
-    print(f"📂 Încarc modelul din: {MODEL_PATH}")
+    print(f"Încarc modelul din: {MODEL_PATH}")
     model = ParkingCNN().to(device)
     try:
         model.load_state_dict(torch.load(MODEL_PATH, map_location=device))
         model.eval()
     except Exception as e:
-        print(f"❌ Eroare la încărcarea modelului: {e}")
+        print(f"Eroare la încărcarea modelului: {e}")
         return
 
     # 4. Inferenta (Predictie)
     all_preds = []
     all_labels = []
 
-    print("⏳ Se ruleaza inferenta...")
+    print("Se ruleaza inferenta...")
     with torch.no_grad():
         for inputs, labels in test_loader:
             inputs = inputs.to(device)
@@ -77,9 +77,9 @@ def evaluate_model():
     f1 = f1_score(all_labels, all_preds, average='macro')
     
     print("\n" + "="*30)
-    print(f"✅ REZULTATE FINALE:")
-    print(f"🎯 Acuratețe (Accuracy): {acc*100:.2f}%")
-    print(f"⚖️  F1-Score (Macro):    {f1:.4f}")
+    print(f"REZULTATE FINALE:")
+    print(f"Acuratețe (Accuracy): {acc*100:.2f}%")
+    print(f"F1-Score (Macro):    {f1:.4f}")
     print("="*30)
 
     # Salvare JSON
@@ -105,7 +105,7 @@ def evaluate_model():
     
     os.makedirs(DOCS_DIR, exist_ok=True)
     plt.savefig(os.path.join(DOCS_DIR, 'confusion_matrix.png'))
-    print(f"📉 Grafic salvat: {os.path.join(DOCS_DIR, 'confusion_matrix.png')}")
+    print(f"Grafic salvat: {os.path.join(DOCS_DIR, 'confusion_matrix.png')}")
 
 if __name__ == "__main__":
     evaluate_model()
