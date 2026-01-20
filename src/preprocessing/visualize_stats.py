@@ -33,7 +33,7 @@ def main():
 
     os.makedirs(os.path.dirname(OUTPUT_IMG), exist_ok=True)
     plt.savefig(OUTPUT_IMG)
-    print(f"📊 Graficul a fost salvat în: {OUTPUT_IMG}")
+    print(f"Graficul a fost salvat în: {OUTPUT_IMG}")
     plt.show()
 
 if __name__ == "__main__":

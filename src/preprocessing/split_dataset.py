@@ -10,7 +10,7 @@ VAL_DIR = os.path.join(BASE_DIR, 'data', 'validation')
 TEST_DIR = os.path.join(BASE_DIR, 'data', 'test')
 
 def main():
-    print("📦 Se împarte dataset-ul (70% Train, 15% Val, 15% Test)...")
+    print("Se împarte dataset-ul (70% Train, 15% Val, 15% Test)...")
     
     for folder in [TRAIN_DIR, VAL_DIR, TEST_DIR]:
         for cls in ['liber', 'ocupat']:
@@ -37,7 +37,7 @@ def main():
         for f in val_files:   shutil.copy2(os.path.join(src_path, f), os.path.join(VAL_DIR, cls, f))
         for f in test_files:  shutil.copy2(os.path.join(src_path, f), os.path.join(TEST_DIR, cls, f))
 
-    print("✅ Dataset-ul a fost structurat pentru antrenare!")
+    print("Dataset-ul a fost structurat pentru antrenare!")
 
 if __name__ == "__main__":
     main()
