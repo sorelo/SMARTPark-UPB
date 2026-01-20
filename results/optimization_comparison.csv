@@ -1,0 +1,3 @@
+Versiune,Acuratețe,F1-Score,Latență (ms/loc)
+Baseline (Etapa 5),100.00%,1.0000,0.08ms
+Optimizat (Etapa 6),100.00%,1.0000,0.02ms
