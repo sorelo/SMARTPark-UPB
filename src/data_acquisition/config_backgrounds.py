@@ -180,7 +180,7 @@ def main():
                 all_configs[filename] = active_spots
                 with open(CONFIG_FILE, 'w', encoding='utf-8') as f:
                     json.dump(all_configs, f, indent=4)
-                print(f"✅ Configurație salvată în {CONFIG_FILE}")
+                print(f"Configurație salvată în {CONFIG_FILE}")
                 cv2.destroyAllWindows()
                 return
 

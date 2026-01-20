@@ -62,7 +62,7 @@ def apply_environment(image, period):
 
 def main():
     if not os.path.exists(CONFIG_FILE):
-        print("❌ Eroare: Nu am găsit parking_spots.json! Trasează locurile mai întâi.")
+        print("Eroare: Nu am găsit parking_spots.json! Trasează locurile mai întâi.")
         return
 
     with open(CONFIG_FILE, 'r') as f:
@@ -70,7 +70,7 @@ def main():
 
     car_files = glob.glob(os.path.join(CAR_DIR, "*.png"))
     if not car_files:
-        print(f"❌ Eroare: Nu am găsit mașini PNG în {CAR_DIR}")
+        print(f"Eroare: Nu am găsit mașini PNG în {CAR_DIR}")
         return
 
     loaded_cars = [cv2.imread(c, cv2.IMREAD_UNCHANGED) for c in car_files]
@@ -129,7 +129,7 @@ def main():
                     cv2.imwrite(os.path.join(OUTPUT_DIR, label, filename), crop_resized)
                     count += 1
 
-    print(f"✅ Gata! S-au generat {count} imagini în data/processed/")
+    print(f"Gata! S-au generat {count} imagini în data/processed/")
 
 if __name__ == "__main__":
     main()
