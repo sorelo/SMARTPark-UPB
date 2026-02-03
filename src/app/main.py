@@ -10,6 +10,7 @@ import pandas as pd
 import time
 from datetime import datetime
 from PIL import Image
+from torchvision import transforms
 
 # --- CONFIGURARE CAI ---
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -40,10 +41,9 @@ PROXIMITY_MAP = {
 
 st.set_page_config(page_title="SMARTPark UPB - Dashboard", page_icon="P", layout="wide")
 
-# --- STILIZARE VIZUALA AVANSATA (TEMA INTUNECATA) ---
+# --- STILIZARE VIZUALA AVANSATA ---
 st.markdown("""
     <style>
-    /* Fundal general si font */
     @import url('https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600;700&display=swap');
     
     .stApp {
@@ -52,7 +52,6 @@ st.markdown("""
         color: #f1f5f9;
     }
 
-    /* Header */
     h1 {
         font-weight: 700 !important;
         color: #ffffff !important;
@@ -69,7 +68,6 @@ st.markdown("""
         font-weight: bold;
     }
 
-    /* Carduri de Metrici in Statistici */
     [data-testid="stMetric"] {
         background-color: #1e293b !important;
         border: 1px solid #334155 !important;
@@ -83,7 +81,6 @@ st.markdown("""
         font-weight: 700 !important;
     }
 
-    /* Caseta de Recomandare */
     .recommendation-container {
         background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
         border: 1px solid #334155;
@@ -108,14 +105,7 @@ st.markdown("""
         line-height: 1.5;
     }
 
-    /* Tab-uri */
-    .stTabs [data-baseweb="tab-list"] {
-        gap: 8px;
-        background-color: transparent;
-    }
-
     .stTabs [data-baseweb="tab"] {
-        height: 45px;
         background-color: #1e293b;
         border-radius: 8px 8px 0 0;
         padding: 0 24px;
@@ -129,33 +119,17 @@ st.markdown("""
         color: #0f172a !important;
     }
 
-    /* Imagini harti */
-    .stImage img {
-        border-radius: 10px;
-        border: 1px solid #334155;
-    }
-
-    /* Buton principal */
     .stButton button {
         background-color: #deff9a !important;
         color: #0f172a !important;
-        border: none !important;
         font-weight: 700 !important;
-        height: 3.5rem !important;
         border-radius: 10px !important;
         text-transform: uppercase;
-        letter-spacing: 1px;
-        transition: 0.3s;
-    }
-    
-    .stButton button:hover {
-        background-color: #e2ffae !important;
-        transform: scale(1.02);
     }
     </style>
     """, unsafe_allow_html=True)
 
-# --- LOGICA BACKEND (Sincronizata) ---
+# --- LOGICA BACKEND ---
 def get_time_period(hour):
     if 7 <= hour <= 11: return "Dimineata"
     if 12 <= hour <= 16: return "Pranz"
@@ -174,15 +148,8 @@ def log_ai_results(results, hour):
         })
     df_new = pd.DataFrame(new_data)
     
-    should_overwrite = False
-    if os.path.exists(LOG_FILE):
-        try:
-            temp_df = pd.read_csv(LOG_FILE, nrows=0)
-            if len(temp_df.columns) != len(df_new.columns): should_overwrite = True
-        except: should_overwrite = True
-
-    if not os.path.exists(LOG_FILE) or should_overwrite:
-        os.makedirs(os.path.dirname(LOG_FILE), exist_ok=True)
+    os.makedirs(os.path.dirname(LOG_FILE), exist_ok=True)
+    if not os.path.exists(LOG_FILE):
         df_new.to_csv(LOG_FILE, index=False)
     else:
         df_new.to_csv(LOG_FILE, mode='a', header=False, index=False)
@@ -235,7 +202,8 @@ def analyze_all_zones(configs, model, device, hour):
                 if car_files:
                     car = cv2.resize(random.choice(car_files), (w, h))
                     alpha = car[:,:,3]/255.0
-                    for c in range(3): temp_scene[y:y+h, x:x+w, c] = temp_scene[y:y+h, x:x+w, c]*(1-alpha) + car[:,:,c]*alpha
+                    for c in range(3): 
+                        temp_scene[y:y+h, x:x+w, c] = temp_scene[y:y+h, x:x+w, c]*(1-alpha) + car[:,:,c]*alpha
 
         final_scene = simulate_environment(temp_scene, period)
         free_count = 0
@@ -266,7 +234,6 @@ def analyze_all_zones(configs, model, device, hour):
     log_ai_results(zone_results, hour)
     return zone_results
 
-# --- UI MAIN ---
 def main():
     st.markdown("<h1>SMARTPark UPB <span class='status-badge'>Sistem Activ</span></h1>", unsafe_allow_html=True)
     
@@ -278,18 +245,12 @@ def main():
 
     tab1, tab2 = st.tabs(["Asistent Planificare", "Analiza Grad Ocupare"])
 
-    # --- TAB 1: ASISTENT ---
     with tab1:
         c1, c2 = st.columns([1, 2.5], gap="large")
         with c1:
             st.markdown("### Optiuni Calatorie")
             target_hour = st.slider("Ora sosirii in campus", 7, 21, 9)
-            
-            preferred_dest = st.selectbox(
-                "Destinatia vizata",
-                options=list(ZONE_MAP.values())
-            )
-            
+            preferred_dest = st.selectbox("Destinatia vizata", options=list(ZONE_MAP.values()))
             st.markdown(f"<p style='color: #94a3b8;'>Moment detectat: <b>{get_time_period(target_hour)}</b></p>", unsafe_allow_html=True)
             search_btn = st.button("Verifica Disponibilitatea", use_container_width=True)
 
@@ -302,18 +263,16 @@ def main():
                 buddy_name = PROXIMITY_MAP.get(preferred_dest)
                 buddy_data = next((r for r in results if r["nume"] == buddy_name), None) if buddy_name else None
                 
-                title_rec, msg_rec = "", ""
-                
                 if pref_data and pref_data["libere"] > 0:
                     title_rec = f"Loc Gasit la {preferred_dest}"
-                    msg_rec = f"Exista {pref_data['libere']} locuri libere identificate. Va puteti indrepta direct catre parcare."
+                    msg_rec = f"Exista {pref_data['libere']} locuri libere. Va puteti indrepta catre parcare."
                 elif buddy_data and buddy_data["libere"] > 0:
                     title_rec = f"Parcarea {preferred_dest} este Plina"
-                    msg_rec = f"Va recomandam parcarea {buddy_name}. Este cea mai apropiata varianta si are {buddy_data['libere']} locuri libere."
+                    msg_rec = f"Va recomandam {buddy_name}. Are {buddy_data['libere']} locuri libere."
                 else:
                     best_alt = max(results, key=lambda x: x['libere'])
                     title_rec = "Aglomeratie Ridicata"
-                    msg_rec = f"Zonele din apropiere sunt ocupate. Cea mai buna alternativa acum este {best_alt['nume']}."
+                    msg_rec = f"Cea mai buna alternativa acum este {best_alt['nume']}."
 
                 st.markdown(f"""
                     <div class="recommendation-container">
@@ -322,61 +281,55 @@ def main():
                     </div>
                 """, unsafe_allow_html=True)
                 
-                # Afisare imagini in grid
                 grid_cols = st.columns(2)
                 for i, r in enumerate(results):
                     with grid_cols[i % 2]:
                         st.image(r['imagine'], caption=f"{r['nume']} | {r['libere']} Libere", use_container_width=True)
             else:
-                st.markdown("""
-                    <div style='text-align: center; padding: 100px 20px; color: #64748b;'>
-                        <h3>Sistem in Asteptare</h3>
-                        <p>Configurati ora sosirii si destinatia pentru a rula analiza neurala.</p>
-                    </div>
-                """, unsafe_allow_html=True)
+                st.markdown("<div style='text-align: center; padding: 100px 20px; color: #64748b;'><h3>Sistem in Asteptare</h3></div>", unsafe_allow_html=True)
 
-    # --- TAB 2: STATISTICI ---
     with tab2:
         if os.path.exists(LOG_FILE):
             try:
-                df = pd.read_csv(LOG_FILE, on_bad_lines='skip')
-                st.markdown("### Monitorizare Date Istorice")
-                
-                sel_hour = st.select_slider("Filtreaza media de ocupare pe ora", options=range(7, 22), value=12)
-                df_h = df[df['Ora_Selectata'] == sel_hour]
-                
-                if not df_h.empty:
-                    stats = df_h.groupby('Zona')['Grad_Ocupare'].mean().reset_index()
-                    
-                    m1, m2, m3 = st.columns(3)
-                    m1.metric("Ocupare Medie", f"{stats['Grad_Ocupare'].mean():.1f}%")
-                    m2.metric("Total Probe AI", len(df_h))
-                    m3.metric("Ora Analizata", f"{sel_hour}:00")
-                    
-                    st.divider()
-                    
-                    col_l, col_r = st.columns([1.5, 1])
-                    with col_l:
-                        st.markdown(f"#### Comparatie Zone la ora {sel_hour}:00")
-                        st.bar_chart(stats.set_index('Zona'))
-                    with col_r:
-                        st.markdown("#### Detalii Procentuale")
-                        st.table(stats.set_index('Zona'))
-                    
-                    st.divider()
-                    st.markdown("#### Evolutia Gradului de Ocupare (Total)")
-                    line_chart_data = df.pivot_table(index='Ora_Selectata', columns='Zona', values='Grad Ocupare', aggfunc='mean')
-                    st.line_chart(line_chart_data)
+                df = pd.read_csv(LOG_FILE)
+                if df.empty:
+                    st.warning("Inca nu exista date colectate.")
                 else:
-                    st.warning(f"Nu exista date inregistrate pentru ora {sel_hour}:00. Efectuati cautari pentru a popula baza de date.")
-            
-            except Exception:
-                st.error("Eroare la procesarea fisierului de log. Incercati sa resetati datele.")
+                    st.markdown("### Monitorizare Date Istorice")
+                    sel_hour = st.select_slider("Filtreaza media de ocupare pe ora", options=range(7, 22), value=12)
+                    df_h = df[df['Ora_Selectata'] == sel_hour]
+                    
+                    if not df_h.empty:
+                        stats = df_h.groupby('Zona')['Grad_Ocupare'].mean().reset_index()
+                        m1, m2, m3 = st.columns(3)
+                        m1.metric("Ocupare Medie", f"{stats['Grad_Ocupare'].mean():.1f}%")
+                        m2.metric("Total Probe AI", len(df_h))
+                        m3.metric("Ora Analizata", f"{sel_hour}:00")
+                        
+                        st.divider()
+                        col_l, col_r = st.columns([1.5, 1])
+                        with col_l:
+                            st.bar_chart(stats.set_index('Zona'))
+                        with col_r:
+                            st.table(stats.set_index('Zona'))
+                        
+                        st.divider()
+                        st.markdown("#### Evolutia Gradului de Ocupare (Total)")
+                        line_chart_data = df.pivot_table(index='Ora_Selectata', columns='Zona', values='Grad_Ocupare', aggfunc='mean')
+                        st.line_chart(line_chart_data)
+                    else:
+                        st.warning(f"Nu exista date pentru ora {sel_hour}:00.")
+                
+                if st.button("Sterge Istoric"):
+                    os.remove(LOG_FILE)
+                    st.rerun()
+            except Exception as e:
+                st.error(f"Eroare la procesarea logului. Resetati datele.")
                 if st.button("Resetare Log"):
                     os.remove(LOG_FILE)
                     st.rerun()
         else:
-            st.warning("Inca nu au fost colectate date. Rulati asistentul de planificare.")
+            st.warning("Inca nu au fost colectate date.")
 
 if __name__ == "__main__":
     main()
