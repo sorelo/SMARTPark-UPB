@@ -100,8 +100,6 @@ Proiectul propune o alternativă modernă la senzorii hardware scumpi și greu d
 
 **Descriere metodă generare/achiziție:**
 
-*[Explicați în 1-2 paragrafe: Cum ați generat/achiziționat datele originale? Ce parametri ați folosit? De ce sunt relevante pentru problema voastră?]*
-
 Generarea datelor originale a fost efectuată printr-un motor de simulare dezvoltat în Python. Scriptul combină imagini de fundal capturate din satelit cu modele de vehicule decupate manual. În procesul de aplicare a modelelor de vehicule, au fost introduse rotații și scalări aleatorii. Pentru simulare, au fost folosite trei perioade ale zilei, prin ajustarea parametrilor de luminozitate și contrast. Astfel, a fost creat un set de date cu 10.000 de imagini, fără erori umane.
 
 Datele sunt relevante deoarece elimină dependența de senzori hardware costisitori. Simulările iau în calcul momente critice precum lumina scăzută sau unghiurile variate de parcare. Rețeaua învață modele vizuale robuste care funcționează direct pe infrastructura video existentă în campusul UPB. Această metodă garantează o diversitate imposibil de obținut prin colectare manuală într-un timp scurt.
@@ -156,8 +154,6 @@ Datele sunt relevante deoarece elimină dependența de senzori hardware costisit
 
 **Justificare alegere arhitectură State Machine:**
 
-*[1 paragraf: De ce această structură pentru problema voastră specifică?]*
-
 Arhitectura de tip Event Driven Simulation Loop permite procesarea independentă a fiecărui loc de parcare din campusul UPB. Această structură separă complet logica de generare a datelor de motorul de inferență neuronală. Izolarea modulelor facilitează actualizarea modelului ParkingCNN fără a modifica interfața grafică. Sistemul asigură o latență redusă prin execuția secvențială a stărilor critice. Această metodă garantează integritatea datelor în timpul monitorizării în timp real.
 
 ---
@@ -180,8 +176,6 @@ Output: 2 clase (0: Liber, 1: Ocupat)
 ```
 
 **Justificare alegere arhitectură:**
-
-*[1-2 propoziții: De ce această arhitectură? Ce alternative ați considerat și de ce le-ați respins?]*
 
 Această structură oferă un echilibru optim între precizia detecției și viteza de inferență necesară pentru monitorizarea în timp real. Am respins modelele MLP simple deoarece acestea nu pot extrage corelații spațiale între pixeli. De asemenea, am evitat utilizarea unor modele preantrenate complexe precum ResNet. Acestea consumă resurse computaționale excesive și riscă supraînvățarea pe un set de date cu trăsături geometrice repetitive.
 
@@ -210,8 +204,6 @@ Această structură oferă un echilibru optim între precizia detecției și vit
 | **FINAL** | Configurația Exp 4 (LR 0.0005 + Dropout + Zgomot) | **98.42%** | **0.981** | 18 min | **Modelul folosit în producție** |
 
 **Justificare alegere model final:**
-
-*[1 paragraf: De ce această configurație? Ce compromisuri ați făcut între accuracy/timp/complexitate?]*
 
 Configurația aleasă pentru modelul final asigură cea mai mare precizie și reziliență la condițiile simulate. Am prioritizat acuratețea și robustețea în detrimentul timpului de antrenare. Introducerea zgomotului Gaussian forțează rețeaua să ignore imperfecțiunile texturii asfaltului. Stratul de Dropout elimină dependența de anumite grupuri de pixeli specifice mașinilor din setul de asset,uri. Rezultatul este un model capabil să generalizeze excelent pe imagini noi, menținând o latență de inferență redusă.
 
@@ -298,8 +290,6 @@ Rezultatele confirmă viabilitatea sistemului SMARTPark pentru campusul UPB. Acu
 **Locație:** 
 - docs/screenshots/ui_1.png
 - docs/screenshots/ui_2.png
-
-*[Descriere scurtă: Ce se vede în screenshot? Ce demonstrează?]*
 
 Screenshot-ul 1
 
@@ -532,8 +522,6 @@ python src/neural_network/evaluate.py --model models/optimized_model.h5 --quick-
 
 ### 10.2 Ce NU Funcționează – Limitări Cunoscute
 
-*[Fiți onești - evaluatorul apreciază identificarea clară a limitărilor]*
-
 1. **Iluminare extrem de scăzută:** Modelul eșuează când luminozitatea scade sub 20 lucși. Acuratețea scade la 55% în cazul mașinilor negre pe asfalt umed. Contrastul este insuficient pentru extragerea trăsăturilor vizuale.
 2. **Dependența de perspectivă fixă::** Sistemul necesită un unghi de vizualizare constant. Orice mișcare fizică a camerei de supraveghere invalidează măștile ROI. Re-adnotarea manuală a coordonatelor este necesară în acest caz.
 3. **Vehicule supradimensionate:** Camioanele sau dubițele care ocupă parțial două locuri generează erori de clasificare. Modelul poate indica un loc drept liber dacă centrul mașinii nu se află în interiorul crop-ului de 64x64 pixeli.
@@ -556,8 +544,6 @@ python src/neural_network/evaluate.py --model models/optimized_model.h5 --quick-
 
 **Ce ați schimba dacă ați reîncepe proiectul?**
 
-*[1-2 paragrafe: Decizii pe care le-ați lua diferit, cu justificare bazată pe experiența acumulată]*
-
 Dacă aș reîncepe proiectul, aș implementa stocarea în cloud imediat. Stocarea în memorie a limitat analiza istorică. Datele se pierd la fiecare restart. O bază de date externă permite accesul simultan pentru mulți utilizatori. Aceasta pregătește sistemul pentru utilizare reală.
 
 De asemenea, aș include condiții meteo în motorul de generare. Simularea ploii sau a zăpezii creează un model robust. Diversitatea datelor este mai valoroasă decât volumul lor. Această abordare ar fi redus efortul de optimizare din Etapa 6.
@@ -573,8 +559,6 @@ De asemenea, aș include condiții meteo în motorul de generare. Simularea ploi
 ---
 
 ## 11. Bibliografie
-
-*[Minimum 3 surse cu DOI/link funcțional - format: Autor, Titlu, Anul, Link]*
 
 1. Abaza Bogdan, Curs "Rețele Neuronale", 2025-2026, https://curs.upb.ro/2025/course/view.php?id=1338
 2. Amato Giuseppe, Carrara Fabio, Falchi Fabrizio, Gennaro Claudio, Meghini Carlo, Vairo Claudio, Deep Learning for Decentralized Parking Lot Occupancy Detection, 2017, https://doi.org/10.1016/j.eswa.2016.10.055
@@ -628,5 +612,3 @@ De asemenea, aș include condiții meteo în motorul de generare. Simularea ploi
 **Tag Git:** `v0.6-optimized-final`
 
 ---
-
-*Acest README servește ca documentație principală pentru Livrabilul 1 (Aplicație RN). Pentru Livrabilul 2 (Prezentare PowerPoint), consultați structura din RN_Specificatii_proiect.pdf.*
