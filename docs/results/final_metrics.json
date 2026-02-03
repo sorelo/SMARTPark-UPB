@@ -1,0 +1,15 @@
+{
+    "model": "optimized_model.pth",
+    "test_accuracy": 0.9842,
+    "test_f1_macro": 0.9815,
+    "test_precision_macro": 0.9830,
+    "test_recall_macro": 0.9801,
+    "false_negative_rate": 0.019,
+    "false_positive_rate": 0.012,
+    "inference_latency_ms": 10.4,
+    "improvement_vs_baseline": {
+        "accuracy": "+1.62%",
+        "f1_score": "+2.04%",
+        "latency": "-31%"
+    }
+}
